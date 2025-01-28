@@ -8,16 +8,16 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - GroundCheck
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Boundary
+  - Ground
+  - AttackCheck
+  - Player
+  - Enemy
+  - Interactable
+  - Pushing
   - 
   - 
   - 
