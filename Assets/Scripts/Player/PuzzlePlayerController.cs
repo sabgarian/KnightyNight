@@ -29,6 +29,7 @@ public class PuzzlePlayerController : MonoBehaviour
 
     public Transform pushingObject = null;
     public bool pushDir;
+    public bool pushSide;
     public int pushingLayer = 12;
 
     void Start()
@@ -60,11 +61,13 @@ public class PuzzlePlayerController : MonoBehaviour
             {
                 if (normalizedInputs.x < 0)
                 {
+                    playerAnimator.SetBool("PushType", pushSide);
                     normalizedInputs.x = Mathf.Clamp(normalizedInputs.x, -1, 0);
                     normalizedInputs.y = Mathf.Clamp(normalizedInputs.y, -1, 0);
                 }
                 else
                 {
+                    playerAnimator.SetBool("PushType", !pushSide);
                     normalizedInputs.x = Mathf.Clamp(normalizedInputs.x, 0, 1);
                     normalizedInputs.y = Mathf.Clamp(normalizedInputs.y, 0, 1);
                 }
@@ -73,11 +76,13 @@ public class PuzzlePlayerController : MonoBehaviour
             {
                 if (normalizedInputs.x < 0)
                 {
+                    playerAnimator.SetBool("PushType", !pushSide);
                     normalizedInputs.x = Mathf.Clamp(normalizedInputs.x, -1, 0);
                     normalizedInputs.y = Mathf.Clamp(normalizedInputs.y, 0, 1);
                 }
                 else
                 {
+                    playerAnimator.SetBool("PushType", pushSide);
                     normalizedInputs.x = Mathf.Clamp(normalizedInputs.x, 0, 1);
                     normalizedInputs.y = Mathf.Clamp(normalizedInputs.y, -1, 0);
                 }
@@ -172,14 +177,17 @@ public class PuzzlePlayerController : MonoBehaviour
     {
         pushingObject.transform.parent = null;
         pushingObject = null;
+        playerAnimator.SetBool("Pushing", false);
     }
 
-    public void TryPushing(Transform newObj, bool PushDir)
+    public void TryPushing(Transform newObj, bool PushDir, bool PushSide)
     {
         usedInteractInput = true;
         pushingObject = newObj;
         newObj.transform.parent = transform;
         newObj.gameObject.layer = pushingLayer;
         pushDir = PushDir;
+        pushSide = PushSide;
+        playerAnimator.SetBool("Pushing", true);
     }
 }

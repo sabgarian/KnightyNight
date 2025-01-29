@@ -63,7 +63,13 @@ public class PushableObject : MonoBehaviour
                 Vector3 pushDirection = playerScript.transform.position - transform.position;
                 pushDirection = transform.rotation * pushDirection;
 
-                playerScript.TryPushing(transform, Mathf.Abs(pushDirection.x) > Mathf.Abs(pushDirection.z));
+                bool pushDir = Mathf.Abs(pushDirection.x) > Mathf.Abs(pushDirection.z);
+                bool pushSide = false;
+                if (pushDir)
+                    pushSide = pushDirection.x > 0;
+                else
+                    pushSide = pushDirection.z > 0;
+                playerScript.TryPushing(transform, pushDir, pushSide);
             }
         }
     }
