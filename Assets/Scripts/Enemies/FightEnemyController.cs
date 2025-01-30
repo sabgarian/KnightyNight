@@ -310,8 +310,13 @@ public class FightEnemyController : MonoBehaviour
         {
             int damage = data[0];
             int attackType = data[1];
+            int attackDir = data[2];
 
-            //Debug.Log("Damage: " + damage);
+            if (isBlocking && attackDir == transform.localScale.x)
+            {
+                if (isCrouched && attackType == 0 || !isCrouched && attackType == 1)
+                    return;
+            }
             curHealth -= damage;
             if (curHealth <= 0)
             {
@@ -323,7 +328,6 @@ public class FightEnemyController : MonoBehaviour
                 enemyAnimator.SetTrigger("Hit");
                 enemyAnimator.Update(0.1f);
                 enemyAnimator.ResetTrigger("Hit");
-                //Debug.Log("Invulnerable!");
                 StartCoroutine(InvulnerableMode(invulnerabilityTime));
                 if (!engaged)
                     engagementManager.SkipWaitlist(gameObject);

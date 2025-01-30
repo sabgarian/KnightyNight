@@ -150,8 +150,9 @@ public class FightPlayerController : MonoBehaviour
         {
             int damage = data[0];
             int attackType = data[1];
+            int attackDir = data[2];
 
-            if (isBlocking)
+            if (isBlocking && attackDir == transform.localScale.x)
             {
                 if (isCrouched && attackType == 0 || !isCrouched && attackType == 1)
                     return;

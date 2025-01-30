@@ -33,7 +33,7 @@ public class AttackCheck : MonoBehaviour
     {
         if (transform.parent.gameObject.layer != col.gameObject.layer)
         {
-            col.gameObject.transform.parent.gameObject.SendMessage("Damage", new int[] { damage, attackType });
+            col.gameObject.transform.parent.gameObject.SendMessage("Damage", new int[] { damage, attackType, -(int)transform.parent.parent.localScale.x });
         }
     }
 }
