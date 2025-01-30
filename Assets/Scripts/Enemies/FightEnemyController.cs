@@ -5,6 +5,9 @@ using UnityEditor.Animations;
 
 public class FightEnemyController : MonoBehaviour
 {
+    public bool mainEnemy = false;
+    public Vector2 EngagementTimeRange = Vector2.one;
+
     public Vector2 enemySpeed = Vector2.one;
 
     public Animator enemyAnimator;
@@ -38,17 +41,73 @@ public class FightEnemyController : MonoBehaviour
     public bool invulnerable = false;
     public float invulnerabilityTime = 0.25f;
 
+    private EngagementManager engagementManager;
     public bool engaged = false;
+
+    public Vector2 bystanderRangeMin;
+    public Vector2 bystanderRangeMax;
+
+    public Vector2 intimidationRangeMin;
+    public Vector2 intimidationRangeMax;
+    public Vector2 attackInterval;
+
+    public Vector2 attackRange = new Vector2(1, 3);
+    public Vector2 attackHesitation = new Vector2(0.2f, 0.5f);
+
+    public float attackTime = 0f;
+    public float maxAttackTime = 3f;
+
+    public float timeSinceAttack = 0f;
+    public float currentAttackInterval = 10f;
+
+    public Vector2 randomInputTime = new Vector2(0.5f, 2f);
+    public float currentRandomInputTime = 0f;
+    public float maxRandomInputTime = 0f;
+
+    public Vector2 pauseRange = new Vector2(0.25f, 0.75f);
+    public float pauseTime = 0f;
+    public float pauseLength = 0f;
+
+    public Vector2 movementDecisionDelayRange = new Vector2(0.25f, 0.75f);
+    public float movementDecisionDelayTime = 0f;
+    public float movementDecisionDelay = 0f;
+    public bool approaching = false;
+    public bool retreating = false;
+
+    public Vector2 currentRandomInputs = Vector2.zero;
+
+    public bool isAttacking = false;
 
     void Start()
     {
+        engagementManager = GameObject.FindWithTag("EngagementManager").GetComponent<EngagementManager>();
+        if (mainEnemy)
+            engagementManager.AddMainEnemy(gameObject, EngagementTimeRange);
+        else
+            engagementManager.AddEnemy(gameObject, EngagementTimeRange);
+
         curHealth = maxHealth;
         RB = GetComponent<Rigidbody>();
         groundChecker = transform.GetChild(2).gameObject.GetComponent<GroundCheck>();
     }
 
+    void Engage()
+    {
+        engaged = true;
+    }
+
+    void Disengage()
+    {
+        engaged = false;
+    }
+
     void Update()
     {
+        if (engaged)
+            AttackUpdate();
+        else
+            WaitUpdate();
+
         //normalizedInputs = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")).normalized;
         //if (Input.GetButtonDown("Jump"))
         //    jumpInput = true;
@@ -58,6 +117,106 @@ public class FightEnemyController : MonoBehaviour
 
         //if (Input.GetButtonDown("Jab"))
         //    jabInput = true;
+    }
+
+    void AttackUpdate()
+    {
+        normalizedInputs = Vector3.zero;
+        if (timeSinceAttack >= currentAttackInterval)
+        {
+            timeSinceAttack = 0f;
+            currentAttackInterval = Random.Range(attackInterval.x, attackInterval.y);
+            isAttacking = true;
+            attackTime = 0f;
+        }
+        if (!isAttacking)
+        {
+            WaitUpdate();
+        }
+        else
+        {
+            if (attackTime >= maxAttackTime)
+            {
+                isAttacking = false;
+                return;
+            }
+            attackTime += Time.deltaTime;
+            Vector3 playerDir = (engagementManager.playerTrans.position - transform.position);
+            Vector2 playerNormDir = new Vector2(playerDir.x, playerDir.z).normalized;
+            Vector2 playerAbsDist = new Vector2(Mathf.Abs(playerDir.x), Mathf.Abs(playerDir.z));
+            if (playerAbsDist.x <= attackRange.x && playerAbsDist.y <= attackRange.y)
+            {
+                jabInput = true;
+                isAttacking = false;
+                return;
+            }
+            normalizedInputs = playerNormDir;
+        }
+    }
+
+    void WaitUpdate()
+    {
+        timeSinceAttack += Time.deltaTime;
+
+        Vector3 playerDir = (engagementManager.playerTrans.position - transform.position);
+        Vector2 playerNormDir = new Vector2(playerDir.x, playerDir.z).normalized;
+        Vector2 playerAbsDist = new Vector2(Mathf.Abs(playerDir.x), Mathf.Abs(playerDir.z));
+        if (approaching)
+        {
+            movementDecisionDelayTime += Time.deltaTime;
+            normalizedInputs = playerNormDir;
+            if (movementDecisionDelayTime >= movementDecisionDelay)
+            {
+                approaching = false;
+                movementDecisionDelayTime = 0;
+            }
+        }
+        else if (retreating)
+        {
+            movementDecisionDelayTime += Time.deltaTime;
+            normalizedInputs = -playerNormDir;
+            if (movementDecisionDelayTime >= movementDecisionDelay)
+            {
+                retreating = false;
+                movementDecisionDelayTime = 0;
+            }
+        }
+        else
+        {
+            if (engaged && playerAbsDist.x <= intimidationRangeMax.x && playerAbsDist.y <= intimidationRangeMax.y || !engaged && playerAbsDist.x <= bystanderRangeMax.x && playerAbsDist.y <= bystanderRangeMax.y)
+            {
+                if (engaged && playerAbsDist.x <= intimidationRangeMin.x && playerAbsDist.y <= intimidationRangeMin.y || !engaged && playerAbsDist.x <= bystanderRangeMin.x && playerAbsDist.y <= bystanderRangeMin.y)
+                {
+                    retreating = true;
+                    movementDecisionDelay = Random.Range(movementDecisionDelayRange.x, movementDecisionDelayRange.y);
+                }
+                else
+                {
+                    if (currentRandomInputTime >= maxRandomInputTime)
+                    {
+                        pauseTime = 0f;
+                        pauseLength = Random.Range(pauseRange.x, pauseRange.y);
+                        currentRandomInputTime = 0f;
+                        maxRandomInputTime = Random.Range(randomInputTime.x, randomInputTime.y);
+                        currentRandomInputs = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
+                    }
+                    if (pauseTime <= pauseLength)
+                    {
+                        pauseTime += Time.deltaTime;
+                    }
+                    else
+                    {
+                        currentRandomInputTime += Time.deltaTime;
+                        normalizedInputs = currentRandomInputs.normalized;
+                    }
+                }
+            }
+            else
+            {
+                approaching = true;
+                movementDecisionDelay = Random.Range(movementDecisionDelayRange.x, movementDecisionDelayRange.y);
+            }
+        }
     }
 
     void FixedUpdate()
@@ -82,10 +241,10 @@ public class FightEnemyController : MonoBehaviour
         else if (groundChecker.isGrounded)
         {
             timeInAir = 0;
-            if (Input.GetButton("Block"))
-                isBlocking = true;
-            if (Input.GetButton("Crouch"))
-                isCrouched = true;
+            //if (Input.GetButton("Block"))
+            //    isBlocking = true;
+            //if (Input.GetButton("Crouch"))
+            //    isCrouched = true;
             if (jabInput && !isBlocking)
             {
                 int currentState = enemyAnimator.GetCurrentAnimatorStateInfo(0).fullPathHash;
@@ -105,9 +264,11 @@ public class FightEnemyController : MonoBehaviour
             if (!isBlocking && kickInput)
                 enemyAnimator.SetTrigger("KickInput");
             RB.velocity = new Vector3(normalizedInputs.x * enemySpeed.x * Time.fixedDeltaTime, RB.velocity.y, normalizedInputs.y * enemySpeed.y * Time.fixedDeltaTime);
-            if (normalizedInputs.x > 0)
+            Vector3 playerDir = (engagementManager.playerTrans.position - transform.position);
+            Vector2 playerNormDir = new Vector2(playerDir.x, playerDir.z).normalized;
+            if (playerNormDir.x > 0)
                 transform.localScale = new Vector3(-1f, 1f, 1f);
-            else if (normalizedInputs.x < 0)
+            else if (playerNormDir.x < 0)
                 transform.localScale = new Vector3(1f, 1f, 1f);
             // Got jump input
             if (!isJumping && jumpInput)
@@ -150,7 +311,7 @@ public class FightEnemyController : MonoBehaviour
             int damage = data[0];
             int attackType = data[1];
 
-            Debug.Log("Damage: " + damage);
+            //Debug.Log("Damage: " + damage);
             curHealth -= damage;
             if (curHealth <= 0)
             {
@@ -162,8 +323,11 @@ public class FightEnemyController : MonoBehaviour
                 enemyAnimator.SetTrigger("Hit");
                 enemyAnimator.Update(0.1f);
                 enemyAnimator.ResetTrigger("Hit");
-                Debug.Log("Invulnerable!");
+                //Debug.Log("Invulnerable!");
                 StartCoroutine(InvulnerableMode(invulnerabilityTime));
+                if (!engaged)
+                    engagementManager.SkipWaitlist(gameObject);
+                isAttacking = false;
             }
         }
     }
@@ -171,7 +335,9 @@ public class FightEnemyController : MonoBehaviour
     void Die()
     {
         invulnerable = true;
-        Debug.LogError("Dead :(");
+        engagementManager.RemoveEnemy(gameObject);
+        Destroy(gameObject);
+        //Debug.LogError("Dead :(");
     }
 
     IEnumerator InvulnerableMode(float time)

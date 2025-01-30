@@ -4,20 +4,21 @@ using UnityEngine;
 
 public class EngagementManager : MonoBehaviour
 {
+    public Transform playerTrans;
     public int MaximumEngagers = 2;
 
-    private List<GameObject> enrolled = new List<GameObject>();
-    private List<Vector2> EngagementTimeRange = new List<Vector2>();
+    public List<GameObject> enrolled = new List<GameObject>();
+    public List<Vector2> EngagementTimeRange = new List<Vector2>();
 
-    private List<int> waitlist = new List<int>();
+    public List<int> waitlist = new List<int>();
 
-    private List<int> engaged = new List<int>();
-    private List<float> engagementTime = new List<float>();
-    private List<float> maxEngagementTime = new List<float>();
+    public List<int> engaged = new List<int>();
+    public List<float> engagementTime = new List<float>();
+    public List<float> maxEngagementTime = new List<float>();
 
     void Start()
     {
-        
+        playerTrans = GameObject.Find("FightPlayer").transform;
     }
 
     void Update()
@@ -44,7 +45,7 @@ public class EngagementManager : MonoBehaviour
         }
         enrolled.Add(target);
         EngagementTimeRange.Add(engagementTimeRange);
-        waitlist.Add(enrolled.Count);
+        waitlist.Add(enrolled.Count - 1);
     }
 
     public void RemoveEnemy(GameObject target)
@@ -53,8 +54,8 @@ public class EngagementManager : MonoBehaviour
         {
             if (enrolled[i] == target)
             {
-                enrolled.RemoveAt(i);
-                EngagementTimeRange.RemoveAt(i);
+                //enrolled.RemoveAt(i);
+                //EngagementTimeRange.RemoveAt(i);
                 bool removedFromQueues = false;
                 for (int z = 0; z < waitlist.Count; ++z)
                 {
@@ -94,6 +95,39 @@ public class EngagementManager : MonoBehaviour
         engaged.Add(indToAdd);
         engagementTime.Add(0f);
         maxEngagementTime.Add(Random.Range(EngagementTimeRange[indToAdd].x, EngagementTimeRange[indToAdd].y));
+        enrolled[indToAdd].SendMessage("Engage");
+    }
+
+    public void SkipWaitlist(GameObject target)
+    {
+        if (engaged.Count >= MaximumEngagers)
+        {
+            int closestToDoneInd = -1;
+            float closestToDoneTime = Mathf.Infinity;
+
+            for (int i = 0; i < engaged.Count; ++i)
+            {
+                float timeLeft = maxEngagementTime[i] - engagementTime[i];
+                if (timeLeft < closestToDoneTime)
+                {
+                    closestToDoneInd = engaged[i];
+                    closestToDoneTime = timeLeft;
+                }
+            }
+
+            if (closestToDoneInd != -1)
+                Disengage(closestToDoneInd);
+        }
+
+        for (int i = 0; i < waitlist.Count; ++i)
+        {
+            if (enrolled[waitlist[i]] == target)
+            {
+                Engage(i);
+                return;
+            }
+        }
+        Debug.LogError("Enemy (" + target.name + ") not found on waitlist for skip!");
     }
 
     public void AddMainEnemy(GameObject target, Vector2 engagementTimeRange)
@@ -108,6 +142,7 @@ public class EngagementManager : MonoBehaviour
         {
             if (engaged[i] == targetInd)
             {
+                enrolled[engaged[i]].SendMessage("Disengage");
                 waitlist.Add(engaged[i]);
                 engaged.RemoveAt(i);
                 engagementTime.RemoveAt(i);
