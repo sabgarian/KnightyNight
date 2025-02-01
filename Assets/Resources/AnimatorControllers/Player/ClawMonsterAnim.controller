@@ -100,7 +100,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: ee7483a35de7adc4092ac115bca0a209, type: 2}
+  m_Motion: {fileID: 7400000, guid: 6e943a04d034d814584f0511c1121838, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -126,7 +126,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 8b38e8bc5eed15246bc0ac2db89fdf87, type: 2}
+  m_Motion: {fileID: 7400000, guid: 01b6ba8ee4f51904aabb0c3311d39914, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -369,7 +369,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: HoodieMonsterAnim
+  m_Name: ClawMonsterAnim
   serializedVersion: 5
   m_AnimatorParameters:
   - m_Name: Walking
@@ -436,7 +436,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 927398e19677c2040ab4cc0a5eff5919, type: 2}
+  m_Motion: {fileID: 7400000, guid: 16724e266d403f2448e49effe90f5441, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -767,7 +767,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: ab698429b6cfddf4089398a1688ccf16, type: 2}
+  m_Motion: {fileID: 7400000, guid: 409f06195abbf2846b27dce3f6fb58b6, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
