@@ -8,6 +8,7 @@ public class SetPathEnemy : MonoBehaviour
     public float movementSpeed = 2f;
     public bool playing = true;
 
+    private Animator monsterAnim;
     private int oldNode = 0;
     private int newNode = 0;
     private float nodeProgress = 1f;
@@ -16,14 +17,15 @@ public class SetPathEnemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        monsterAnim = transform.GetChild(0).GetComponent<Animator>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!playing)
+        if (!playing || movementSpeed == 0)
             return;
+        monsterAnim.SetBool("Walking", true);
         if (nodeProgress >= 1)
         {
             nodeProgress -= 1f;
@@ -36,16 +38,22 @@ public class SetPathEnemy : MonoBehaviour
             gameObject.SendMessage("SetDirection", Mathf.Atan2(newDir.z, newDir.x) * Mathf.Rad2Deg, SendMessageOptions.DontRequireReceiver);
         }
         transform.position = Vector3.Lerp(pathNodes[oldNode], pathNodes[newNode], nodeProgress);
+        if (pathNodes[oldNode].x > pathNodes[newNode].x)
+            transform.localScale = new Vector3(-1, 1, 1);
+        else
+            transform.localScale = new Vector3(1, 1, 1);
         nodeProgress += Time.deltaTime / nodeSpeed;
     }
 
     void InterruptMovement()
     {
+        monsterAnim.SetBool("Walking", false);
         playing = false;
     }
 
     void ResumeMovement()
     {
+        monsterAnim.SetBool("Walking", true);
         playing = true;
     }
 }

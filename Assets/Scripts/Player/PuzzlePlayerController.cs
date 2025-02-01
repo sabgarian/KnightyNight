@@ -8,6 +8,7 @@ public class PuzzlePlayerController : MonoBehaviour
     public Quaternion perspectiveRotation;
 
     public Vector2 playerSpeed = Vector2.one;
+    public Vector2 pushSpeed = Vector2.one;
     public bool hasTeddy = false;
 
     public Animator playerAnimator;
@@ -60,17 +61,18 @@ public class PuzzlePlayerController : MonoBehaviour
                 return;
             }
 
+            bool newAnimDir = false;
             if (!pushDir)
             {
                 if (normalizedInputs.x < 0)
                 {
-                    playerAnimator.SetBool("PushType", !pushSide);
+                    newAnimDir = !pushSide;
                     normalizedInputs.x = Mathf.Clamp(normalizedInputs.x, -1, 0);
                     normalizedInputs.y = Mathf.Clamp(normalizedInputs.y, -1, 0);
                 }
                 else
                 {
-                    playerAnimator.SetBool("PushType", pushSide);
+                    newAnimDir = pushSide;
                     normalizedInputs.x = Mathf.Clamp(normalizedInputs.x, 0, 1);
                     normalizedInputs.y = Mathf.Clamp(normalizedInputs.y, 0, 1);
                 }
@@ -79,13 +81,13 @@ public class PuzzlePlayerController : MonoBehaviour
             {
                 if (normalizedInputs.x < 0)
                 {
-                    playerAnimator.SetBool("PushType", pushSide);
+                    newAnimDir = !pushSide;
                     normalizedInputs.x = Mathf.Clamp(normalizedInputs.x, -1, 0);
                     normalizedInputs.y = Mathf.Clamp(normalizedInputs.y, 0, 1);
                 }
                 else
                 {
-                    playerAnimator.SetBool("PushType", !pushSide);
+                    newAnimDir = pushSide;
                     normalizedInputs.x = Mathf.Clamp(normalizedInputs.x, 0, 1);
                     normalizedInputs.y = Mathf.Clamp(normalizedInputs.y, -1, 0);
                 }
@@ -98,6 +100,10 @@ public class PuzzlePlayerController : MonoBehaviour
                 minDir = Mathf.Abs(normalizedInputs.y);
             normalizedInputs.x = Mathf.Clamp(normalizedInputs.x, -minDir, minDir);
             normalizedInputs.y = Mathf.Clamp(normalizedInputs.y, -minDir, minDir);
+            if (normalizedInputs.magnitude != 0)
+            {
+                playerAnimator.SetBool("PushType", newAnimDir);
+            }
         }
     }
 
@@ -111,27 +117,35 @@ public class PuzzlePlayerController : MonoBehaviour
             if (normalizedInputs.magnitude > 0.075f)
             {
                 int currentState = playerAnimator.GetCurrentAnimatorStateInfo(0).fullPathHash;
-                if (currentState == -66248418 || currentState == 375856309)
+                //Debug.Log(currentState);
+                if (currentState == -66248418 || currentState == 375856309 || currentState == -1437861093 || currentState == 1618751900)
                     playerAnimator.SetBool("Walking", true);
             }
             if (playerAnimator.GetBool("Walking"))
             {
-                RB.velocity = perspectiveRotation * new Vector3(normalizedInputs.x * playerSpeed.x, RB.velocity.y, normalizedInputs.y * playerSpeed.y);
-                if (normalizedInputs.x > 0 && transform.localScale.x < 0)
+                if (pushingObject == null)
                 {
-                    if (pushingObject != null)
-                        pushingObject.transform.parent = null;
-                    transform.localScale = new Vector3(1f, 1f, 1f);
-                    if (pushingObject != null)
-                        pushingObject.transform.parent = transform;
+                    RB.velocity = perspectiveRotation * new Vector3(normalizedInputs.x * playerSpeed.x, RB.velocity.y, normalizedInputs.y * playerSpeed.y);
+                    if (normalizedInputs.x > 0 && transform.localScale.x < 0)
+                        transform.localScale = new Vector3(1f, 1f, 1f);
+                    else if (normalizedInputs.x < 0 && transform.localScale.x > 0)
+                        transform.localScale = new Vector3(-1f, 1f, 1f);
                 }
-                else if (normalizedInputs.x < 0 && transform.localScale.x > 0)
+                else
                 {
-                    if (pushingObject != null)
+                    RB.velocity = perspectiveRotation * new Vector3(normalizedInputs.x * pushSpeed.x, RB.velocity.y, normalizedInputs.y * pushSpeed.y);
+                    if (normalizedInputs.x > 0 && transform.localScale.x < 0)
+                    {
                         pushingObject.transform.parent = null;
-                    transform.localScale = new Vector3(-1f, 1f, 1f);
-                    if (pushingObject != null)
+                        transform.localScale = new Vector3(-1f, 1f, 1f);
                         pushingObject.transform.parent = transform;
+                    }
+                    else if (normalizedInputs.x < 0 && transform.localScale.x > 0)
+                    {
+                        pushingObject.transform.parent = null;
+                        transform.localScale = new Vector3(1f, 1f, 1f);
+                        pushingObject.transform.parent = transform;
+                    }
                 }
             }
         }
