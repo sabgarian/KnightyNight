@@ -17,7 +17,7 @@ public class FightPlayerController : MonoBehaviour
     public bool isJumping = false;
     private float jumpHeight = 7f;
 
-    public bool isCrouched = false;
+    private bool isCrouched = false;
 
     public bool kickInput = false;
     private float airKickVelocity = 5f;
@@ -28,7 +28,7 @@ public class FightPlayerController : MonoBehaviour
     public bool jabInput = false;
     public int jabNum = 0;
     public float timeSinceJab = 0;
-    private float maxJabInterval = 0.45f;
+    private float maxJabInterval = 0.6f;
 
     public bool isBlocking = false;
 
@@ -51,6 +51,7 @@ public class FightPlayerController : MonoBehaviour
     void Update()
     {
         normalizedInputs = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")).normalized;
+
         if (Input.GetButtonDown("Jump"))
             jumpInput = true;
 
@@ -63,8 +64,10 @@ public class FightPlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
+        //Debug.Log(playerAnimator.GetCurrentAnimatorStateInfo(0).fullPathHash);
         isBlocking = false;
-        isCrouched = false;
+        playerAnimator.SetBool("Walking", false);
+        //isCrouched = false;
         if (jabNum != 0 && timeSinceJab <= maxJabInterval)
         {
             timeSinceJab += Time.fixedDeltaTime;
@@ -82,20 +85,31 @@ public class FightPlayerController : MonoBehaviour
         }
         else if (groundChecker.isGrounded)
         {
+            if (!isJumping)
+                RB.velocity = new Vector3(0, RB.velocity.y, 0);
             timeInAir = 0;
+
+            if (!isBlocking && normalizedInputs.magnitude > 0.075f)
+            {
+                int currentState = playerAnimator.GetCurrentAnimatorStateInfo(0).fullPathHash;
+                if (currentState == -66248418 || currentState == 375856309)
+                    playerAnimator.SetBool("Walking", true);
+            }
             if (Input.GetButton("Block"))
+            {
                 isBlocking = true;
-            if (Input.GetButton("Crouch"))
-                isCrouched = true;
+                playerAnimator.SetBool("Walking", false);
+            }
+            //if (Input.GetButton("Crouch"))
+            //    isCrouched = true;
             if (jabInput && !isBlocking)
             {
                 int currentState = playerAnimator.GetCurrentAnimatorStateInfo(0).fullPathHash;
-                playerAnimator.SetTrigger("JabInput");
-                playerAnimator.Update(0.1f);
-                playerAnimator.ResetTrigger("JabInput");
                 // Check if trigger did anything
-                if (currentState != playerAnimator.GetCurrentAnimatorStateInfo(0).fullPathHash)
+                if (currentState == -66248418 || currentState == 375856309)
                 {
+                    playerAnimator.SetTrigger("JabInput");
+                    playerAnimator.SetBool("Walking", false);
                     timeSinceJab = 0;
                     ++jabNum;
                     if (jabNum > 2 || isCrouched && jabNum > 1)
@@ -105,11 +119,36 @@ public class FightPlayerController : MonoBehaviour
             }
             if (!isBlocking && kickInput)
                 playerAnimator.SetTrigger("KickInput");
-            RB.velocity = new Vector3(normalizedInputs.x * playerSpeed.x * Time.fixedDeltaTime, RB.velocity.y, normalizedInputs.y * playerSpeed.y * Time.fixedDeltaTime);
-            if (normalizedInputs.x > 0)
-                transform.localScale = new Vector3(-1f, 1f, 1f);
-            else if (normalizedInputs.x < 0)
-                transform.localScale = new Vector3(1f, 1f, 1f);
+        }
+        else
+        {
+            if (kickInput && timeInAir < maxAirKickTime && timeInAir >= minAirKickTime)
+            {
+                playerAnimator.SetTrigger("KickInput");
+                playerAnimator.SetBool("Walking", false);
+                timeInAir = maxAirKickTime;
+                RB.velocity = new Vector3(RB.velocity.x + transform.localScale.x * airKickVelocity, 0f, 0f);
+            }
+            timeInAir += Time.fixedDeltaTime;
+        }
+
+        playerAnimator.SetBool("InAir", !groundChecker.isGrounded);
+        //playerAnimator.SetBool("Crouched", isCrouched);
+        playerAnimator.SetBool("Blocking", isBlocking);
+        if (!groundChecker.isGrounded || isBlocking)
+            playerAnimator.SetBool("Walking", false);
+
+        if (groundChecker.isGrounded)
+        {
+            if (playerAnimator.GetBool("Walking"))
+            {
+                RB.velocity = new Vector3(normalizedInputs.x * playerSpeed.x, RB.velocity.y, normalizedInputs.y * playerSpeed.y);
+                if (normalizedInputs.x > 0)
+                    transform.localScale = new Vector3(1f, 1f, 1f);
+                else if (normalizedInputs.x < 0)
+                    transform.localScale = new Vector3(-1f, 1f, 1f);
+            }
+
             // Got jump input
             if (!isJumping && jumpInput)
             {
@@ -119,26 +158,14 @@ public class FightPlayerController : MonoBehaviour
                 RB.velocity *= 0.65f;
                 RB.velocity = new Vector3(RB.velocity.x, RB.velocity.y + jumpHeight, RB.velocity.z);
                 playerAnimator.SetTrigger("Jump");
+                playerAnimator.SetBool("Walking", false);
             }
             else if (isJumping)
             {
                 isJumping = false;
             }
         }
-        else
-        {
-            if (kickInput && timeInAir < maxAirKickTime && timeInAir >= minAirKickTime)
-            {
-                playerAnimator.SetTrigger("KickInput");
-                timeInAir = maxAirKickTime;
-                RB.velocity = new Vector3(RB.velocity.x - transform.localScale.x * airKickVelocity, 0f, 0f);
-            }
-            timeInAir += Time.fixedDeltaTime;
-        }
 
-        playerAnimator.SetBool("InAir", !groundChecker.isGrounded);
-        playerAnimator.SetBool("Crouched", isCrouched);
-        playerAnimator.SetBool("Blocking", isBlocking);
         groundChecker.isGrounded = false;
         jabInput = false;
         kickInput = false;
@@ -152,7 +179,7 @@ public class FightPlayerController : MonoBehaviour
             int attackType = data[1];
             int attackDir = data[2];
 
-            if (isBlocking && attackDir == transform.localScale.x)
+            if (isBlocking) //  && attackDir == transform.localScale.x
             {
                 if (isCrouched && attackType == 0 || !isCrouched && attackType == 1)
                     return;

@@ -263,13 +263,13 @@ public class FightEnemyController : MonoBehaviour
             }
             if (!isBlocking && kickInput)
                 enemyAnimator.SetTrigger("KickInput");
-            RB.velocity = new Vector3(normalizedInputs.x * enemySpeed.x * Time.fixedDeltaTime, RB.velocity.y, normalizedInputs.y * enemySpeed.y * Time.fixedDeltaTime);
+            RB.velocity = new Vector3(normalizedInputs.x * enemySpeed.x, RB.velocity.y, normalizedInputs.y * enemySpeed.y);
             Vector3 playerDir = (engagementManager.playerTrans.position - transform.position);
             Vector2 playerNormDir = new Vector2(playerDir.x, playerDir.z).normalized;
             if (playerNormDir.x > 0)
-                transform.localScale = new Vector3(-1f, 1f, 1f);
-            else if (playerNormDir.x < 0)
                 transform.localScale = new Vector3(1f, 1f, 1f);
+            else if (playerNormDir.x < 0)
+                transform.localScale = new Vector3(-1f, 1f, 1f);
             // Got jump input
             if (!isJumping && jumpInput)
             {
@@ -312,7 +312,7 @@ public class FightEnemyController : MonoBehaviour
             int attackType = data[1];
             int attackDir = data[2];
 
-            if (isBlocking && attackDir == transform.localScale.x)
+            if (isBlocking) //  && attackDir == transform.localScale.x
             {
                 if (isCrouched && attackType == 0 || !isCrouched && attackType == 1)
                     return;

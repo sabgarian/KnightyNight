@@ -5,6 +5,8 @@ using UnityEditor.Animations;
 
 public class PuzzlePlayerController : MonoBehaviour
 {
+    public Quaternion perspectiveRotation;
+
     public Vector2 playerSpeed = Vector2.one;
     public bool hasTeddy = false;
 
@@ -57,17 +59,17 @@ public class PuzzlePlayerController : MonoBehaviour
                 return;
             }
 
-            if (pushDir)
+            if (!pushDir)
             {
                 if (normalizedInputs.x < 0)
                 {
-                    playerAnimator.SetBool("PushType", pushSide);
+                    playerAnimator.SetBool("PushType", !pushSide);
                     normalizedInputs.x = Mathf.Clamp(normalizedInputs.x, -1, 0);
                     normalizedInputs.y = Mathf.Clamp(normalizedInputs.y, -1, 0);
                 }
                 else
                 {
-                    playerAnimator.SetBool("PushType", !pushSide);
+                    playerAnimator.SetBool("PushType", pushSide);
                     normalizedInputs.x = Mathf.Clamp(normalizedInputs.x, 0, 1);
                     normalizedInputs.y = Mathf.Clamp(normalizedInputs.y, 0, 1);
                 }
@@ -76,13 +78,13 @@ public class PuzzlePlayerController : MonoBehaviour
             {
                 if (normalizedInputs.x < 0)
                 {
-                    playerAnimator.SetBool("PushType", !pushSide);
+                    playerAnimator.SetBool("PushType", pushSide);
                     normalizedInputs.x = Mathf.Clamp(normalizedInputs.x, -1, 0);
                     normalizedInputs.y = Mathf.Clamp(normalizedInputs.y, 0, 1);
                 }
                 else
                 {
-                    playerAnimator.SetBool("PushType", pushSide);
+                    playerAnimator.SetBool("PushType", !pushSide);
                     normalizedInputs.x = Mathf.Clamp(normalizedInputs.x, 0, 1);
                     normalizedInputs.y = Mathf.Clamp(normalizedInputs.y, -1, 0);
                 }
@@ -107,7 +109,7 @@ public class PuzzlePlayerController : MonoBehaviour
         {
             if (Input.GetButton("Crouch"))
                 isCrouched = true;
-            RB.velocity = new Vector3(normalizedInputs.x * playerSpeed.x * Time.fixedDeltaTime, RB.velocity.y, normalizedInputs.y * playerSpeed.y * Time.fixedDeltaTime);
+            RB.velocity = perspectiveRotation * new Vector3(normalizedInputs.x * playerSpeed.x * Time.fixedDeltaTime, RB.velocity.y, normalizedInputs.y * playerSpeed.y * Time.fixedDeltaTime);
 
             if (normalizedInputs.x > 0)
             {
