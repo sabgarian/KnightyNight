@@ -50,7 +50,7 @@ public class ExitDoor : MonoBehaviour
                 else
                 {
                     playerScript.usedInteractInput = true;
-                    GameObject.FindWithTag("MainCamera").GetComponent<PuzzleLevelManager>().FinishPuzzle();
+                    GameObject.FindWithTag("MainCamera").GetComponent<PuzzleLevelManager>().NextPuzzle();
                 }
             }
         }

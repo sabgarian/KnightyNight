@@ -4,12 +4,16 @@ using UnityEngine;
 
 public class PuzzleLevelManager : MonoBehaviour
 {
+    private int lastLoadedPuzzle = -1;
     public int currentPuzzle = -1;
     public Vector3 newPuzzleCoord;
     public Vector3 oldPuzzleCoord;
     public float puzzleTransitionSpeed = 1f;
     private float puzzleTransitionTime = 0f;
     public GameObject[] puzzles;
+
+    public GameObject curPuzzleGO = null;
+
     public float[] cameraZoom;
 
     public Transform playerTrans;
@@ -20,38 +24,58 @@ public class PuzzleLevelManager : MonoBehaviour
     {
         playerTrans = GameObject.FindWithTag("Player").transform;
         mainCamera = GameObject.FindWithTag("MainCamera").GetComponent<Camera>();
-        StartCoroutine(NextPuzzle());
+        StartCoroutine(LoadPuzzle());
     }
 
-    public void FinishPuzzle()
+    public void NextPuzzle()
     {
         if (puzzleTransitionTime < 1f)
             return;
-        StartCoroutine(NextPuzzle());
+        ++currentPuzzle;
+        StartCoroutine(LoadPuzzle());
     }
 
-    IEnumerator NextPuzzle()
+    public IEnumerator LoadPuzzle()
     {
-        int oldIndex = currentPuzzle;
-        ++currentPuzzle;
+        Vector3 newPoint = Vector3.zero;
+        Vector3 oldPoint = newPoint;
+        if (lastLoadedPuzzle < currentPuzzle)
+        {
+            newPoint = newPuzzleCoord;
+            oldPoint = oldPuzzleCoord;
+        }
+        else
+        {
+            newPoint = oldPuzzleCoord;
+            oldPoint = newPuzzleCoord;
+        }
+        lastLoadedPuzzle = currentPuzzle;
         puzzleTransitionTime = 0;
-        puzzles[currentPuzzle].SetActive(true);
-        playerTrans.gameObject.GetComponent<PuzzlePlayerController>().Freeze();
+        GameObject newPuzzle = GameObject.Instantiate(puzzles[currentPuzzle]);
+
+        PuzzlePlayerController playerController = playerTrans.gameObject.GetComponent<PuzzlePlayerController>();
+        playerController.invulnerable = true;
+        playerController.Freeze();
+
         Vector3 oldPlayerPos = playerTrans.transform.position;
         float oldCamSize = mainCamera.orthographicSize;
         while (puzzleTransitionTime < 1f)
         {
             puzzleTransitionTime += Time.deltaTime * puzzleTransitionSpeed;
             float smoothTime = Mathf.SmoothStep(0, 1f, puzzleTransitionTime);
-            if (oldIndex >= 0)
-                puzzles[oldIndex].transform.position = Vector3.Lerp(Vector3.zero, oldPuzzleCoord, smoothTime);
-            puzzles[currentPuzzle].transform.position = Vector3.Lerp(newPuzzleCoord, Vector3.zero, smoothTime);
+            if (curPuzzleGO != null)
+                curPuzzleGO.transform.position = Vector3.Lerp(Vector3.zero, oldPoint, smoothTime);
+            newPuzzle.transform.position = Vector3.Lerp(newPoint, Vector3.zero, smoothTime);
             mainCamera.orthographicSize = Mathf.Lerp(oldCamSize, cameraZoom[currentPuzzle], smoothTime);
-            playerTrans.transform.position = Vector3.Lerp(oldPlayerPos, puzzles[currentPuzzle].transform.GetChild(0).position, smoothTime);
+            playerTrans.transform.position = Vector3.Lerp(oldPlayerPos, newPuzzle.transform.GetChild(0).position, smoothTime);
             yield return new();
         }
-        if (oldIndex >= 0)
-            puzzles[oldIndex].SetActive(false);
-        playerTrans.gameObject.GetComponent<PuzzlePlayerController>().Unfreeze();
+        if (curPuzzleGO != null)
+            Destroy(curPuzzleGO);
+
+        curPuzzleGO = newPuzzle;
+
+        playerController.invulnerable = false;
+        playerController.Unfreeze();
     }
 }

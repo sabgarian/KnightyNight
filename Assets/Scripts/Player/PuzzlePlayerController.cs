@@ -5,6 +5,8 @@ using UnityEditor.Animations;
 
 public class PuzzlePlayerController : MonoBehaviour
 {
+    private PuzzleLevelManager levelController;
+
     public Quaternion perspectiveRotation;
 
     public Vector2 playerSpeed = Vector2.one;
@@ -40,7 +42,8 @@ public class PuzzlePlayerController : MonoBehaviour
         curHealth = maxHealth;
         RB = GetComponent<Rigidbody>();
         groundChecker = transform.GetChild(2).gameObject.GetComponent<GroundCheck>();
-        RB.isKinematic = true;
+        Freeze();
+        levelController = GameObject.FindWithTag("MainCamera").GetComponent<PuzzleLevelManager>();
     }
 
     void Update()
@@ -157,10 +160,7 @@ public class PuzzlePlayerController : MonoBehaviour
     public void Damage(int[] data)
     {
         if (!invulnerable)
-        {
-            Debug.Log("Lost!");
-            invulnerable = true;
-        }
+            Die();
     }
 
     public void Kill(GameObject killer)
@@ -180,8 +180,10 @@ public class PuzzlePlayerController : MonoBehaviour
 
     void Die()
     {
+        Debug.Log("Dead!");
         invulnerable = true;
-        Debug.LogError("Dead :(");
+        Freeze();
+        levelController.StartCoroutine(levelController.LoadPuzzle());
     }
 
     IEnumerator InvulnerableMode(float time)

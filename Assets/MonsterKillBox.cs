@@ -36,7 +36,6 @@ public class MonsterKillBox : MonoBehaviour
 
         if (col.transform.parent.gameObject.layer == 9)
         {
-            Debug.Log("pussy was player");
             hasKilled = true;
             col.gameObject.transform.parent.gameObject.SendMessage("Kill", gameObject);
             transform.parent.parent.gameObject.SendMessage("InterruptMovement");
