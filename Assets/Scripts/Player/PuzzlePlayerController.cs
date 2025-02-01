@@ -16,9 +16,6 @@ public class PuzzlePlayerController : MonoBehaviour
 
     public Vector2 normalizedInputs;
 
-    public bool isCrouched = false;
-    public bool isBlocking = false;
-
     public int maxHealth = 200;
     private int curHealth = 0;
 
@@ -102,35 +99,40 @@ public class PuzzlePlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        isBlocking = false;
-        isCrouched = false;
+        playerAnimator.SetBool("Walking", false);
+        RB.velocity = new Vector3(0, RB.velocity.y, 0);
 
         if (groundChecker.isGrounded)
         {
-            if (Input.GetButton("Crouch"))
-                isCrouched = true;
-            RB.velocity = perspectiveRotation * new Vector3(normalizedInputs.x * playerSpeed.x * Time.fixedDeltaTime, RB.velocity.y, normalizedInputs.y * playerSpeed.y * Time.fixedDeltaTime);
-
-            if (normalizedInputs.x > 0)
+            if (normalizedInputs.magnitude > 0.075f)
             {
-                if (pushingObject != null)
-                    pushingObject.transform.parent = null;
-                transform.localScale = new Vector3(-1f, 1f, 1f);
-                if (pushingObject != null)
-                    pushingObject.transform.parent = transform;
+                int currentState = playerAnimator.GetCurrentAnimatorStateInfo(0).fullPathHash;
+                if (currentState == -66248418 || currentState == 375856309)
+                    playerAnimator.SetBool("Walking", true);
             }
-            else if (normalizedInputs.x < 0)
+            if (playerAnimator.GetBool("Walking"))
             {
-                if (pushingObject != null)
-                    pushingObject.transform.parent = null;
-                transform.localScale = new Vector3(1f, 1f, 1f);
-                if (pushingObject != null)
-                    pushingObject.transform.parent = transform;
+                RB.velocity = perspectiveRotation * new Vector3(normalizedInputs.x * playerSpeed.x, RB.velocity.y, normalizedInputs.y * playerSpeed.y);
+                if (normalizedInputs.x > 0 && transform.localScale.x < 0)
+                {
+                    if (pushingObject != null)
+                        pushingObject.transform.parent = null;
+                    transform.localScale = new Vector3(1f, 1f, 1f);
+                    if (pushingObject != null)
+                        pushingObject.transform.parent = transform;
+                }
+                else if (normalizedInputs.x < 0 && transform.localScale.x > 0)
+                {
+                    if (pushingObject != null)
+                        pushingObject.transform.parent = null;
+                    transform.localScale = new Vector3(-1f, 1f, 1f);
+                    if (pushingObject != null)
+                        pushingObject.transform.parent = transform;
+                }
             }
         }
 
         playerAnimator.SetBool("InAir", !groundChecker.isGrounded);
-        playerAnimator.SetBool("Crouched", isCrouched);
         groundChecker.isGrounded = false;
     }
 
@@ -138,27 +140,8 @@ public class PuzzlePlayerController : MonoBehaviour
     {
         if (!invulnerable)
         {
-            int damage = data[0];
-            int attackType = data[1];
-
-            if (isBlocking)
-            {
-                if (isCrouched && attackType == 0 || !isCrouched && attackType == 1)
-                    return;
-            }
-            curHealth -= damage;
-            if (curHealth <= 0)
-            {
-                curHealth = 0;
-                Die();
-            }
-            else
-            {
-                playerAnimator.SetTrigger("Hit");
-                playerAnimator.Update(0.1f);
-                playerAnimator.ResetTrigger("Hit");
-                StartCoroutine(InvulnerableMode(invulnerabilityTime));
-            }
+            Debug.Log("Lost!");
+            invulnerable = true;
         }
     }
 

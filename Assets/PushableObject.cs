@@ -29,6 +29,8 @@ public class PushableObject : MonoBehaviour
         {
             if (playerScript.pushingObject == transform)
                 playerScript.EndPush();
+            RB = gameObject.AddComponent<Rigidbody>();
+            RB.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
             RB.useGravity = true;
             falling = true;
             pushable = false;
@@ -36,6 +38,7 @@ public class PushableObject : MonoBehaviour
         else if (groundCheck.isGrounded && falling)
         {
             RB.useGravity = false;
+            Destroy(RB);
             falling = false;
             pushable = true;
         }
