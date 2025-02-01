@@ -33,6 +33,7 @@ public class AttackCheck : MonoBehaviour
     {
         if (transform.parent.gameObject.layer != col.gameObject.layer)
         {
+            //Debug.Log("hit " + transform.parent.gameObject.name);
             col.gameObject.transform.parent.gameObject.SendMessage("Damage", new int[] { damage, attackType, -(int)transform.parent.parent.localScale.x });
         }
     }

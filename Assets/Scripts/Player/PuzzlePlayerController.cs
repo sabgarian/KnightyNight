@@ -24,18 +24,22 @@ public class PuzzlePlayerController : MonoBehaviour
     public float respawnInvulnerabilityTime = 2.0f;
 
     public bool interactInput = false;
-    private bool usedInteractInput = false;
+    [HideInInspector]
+    public bool usedInteractInput = false;
 
     public Transform pushingObject = null;
     public bool pushDir;
     public bool pushSide;
     public int pushingLayer = 12;
 
-    void Start()
+    public int keyCount = 0;
+
+    void Awake()
     {
         curHealth = maxHealth;
         RB = GetComponent<Rigidbody>();
         groundChecker = transform.GetChild(2).gameObject.GetComponent<GroundCheck>();
+        RB.isKinematic = true;
     }
 
     void Update()
@@ -136,13 +140,28 @@ public class PuzzlePlayerController : MonoBehaviour
         groundChecker.isGrounded = false;
     }
 
-    void Damage(int[] data)
+    public void Damage(int[] data)
     {
         if (!invulnerable)
         {
             Debug.Log("Lost!");
             invulnerable = true;
         }
+    }
+
+    public void Kill(GameObject killer)
+    {
+        Damage(null);
+    }
+
+    public void Freeze()
+    {
+        RB.isKinematic = true;
+    }
+
+    public void Unfreeze()
+    {
+        RB.isKinematic = false;
     }
 
     void Die()
