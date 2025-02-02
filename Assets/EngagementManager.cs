@@ -5,6 +5,11 @@ using UnityEngine;
 public class EngagementManager : MonoBehaviour
 {
     public Transform playerTrans;
+
+    public int livingEnemies = 0;
+    public GameObject[] Waves; // gameobject storing waves to set to active
+    public float enemyEntryTime = 3f; // switch animation to here and make invulnerable when approaching
+
     public int MaximumEngagers = 2;
 
     public List<GameObject> enrolled = new List<GameObject>();

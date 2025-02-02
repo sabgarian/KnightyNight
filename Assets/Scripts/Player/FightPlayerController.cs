@@ -57,11 +57,11 @@ public class FightPlayerController : MonoBehaviour
         //Debug.Log(normalizedInputs);
         normalizedInputs = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")).normalized;
 
-        if (Input.GetButtonDown("Jump"))
-            jumpInput = true;
+        //if (Input.GetButtonDown("Jump"))
+        //    jumpInput = true;
 
-        if (Input.GetButtonDown("Kick") && !isBlocking)
-            kickInput = true;
+        //if (Input.GetButtonDown("Kick") && !isBlocking)
+        //    kickInput = true;
 
         if (Input.GetButtonDown("Jab"))
             jabInput = true;
@@ -159,7 +159,7 @@ public class FightPlayerController : MonoBehaviour
             timeInAir += Time.fixedDeltaTime;
         }
 
-        playerAnimator.SetBool("InAir", !groundChecker.isGrounded);
+        //playerAnimator.SetBool("InAir", !groundChecker.isGrounded);
         //playerAnimator.SetBool("Crouched", isCrouched);
         playerAnimator.SetBool("Blocking", isBlocking);
         if (!groundChecker.isGrounded || isBlocking)

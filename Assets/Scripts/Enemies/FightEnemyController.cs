@@ -265,8 +265,8 @@ public class FightEnemyController : MonoBehaviour
                     enemyAnimator.SetInteger("CurrentJab", jabNum);
                 }
             }
-            if (!isBlocking && kickInput)
-                enemyAnimator.SetTrigger("KickInput");
+            //if (!isBlocking && kickInput)
+            //    enemyAnimator.SetTrigger("KickInput");
             RB.velocity = new Vector3(normalizedInputs.x * enemySpeed.x, RB.velocity.y, normalizedInputs.y * enemySpeed.y);
             Vector3 playerDir = (engagementManager.playerTrans.position - transform.position);
             Vector2 playerNormDir = new Vector2(playerDir.x, playerDir.z).normalized;
@@ -301,8 +301,8 @@ public class FightEnemyController : MonoBehaviour
         }
 
         enemyAnimator.SetBool("InAir", !groundChecker.isGrounded);
-        enemyAnimator.SetBool("Crouched", isCrouched);
-        enemyAnimator.SetBool("Blocking", isBlocking);
+        //enemyAnimator.SetBool("Crouched", isCrouched);
+        //enemyAnimator.SetBool("Blocking", isBlocking);
         groundChecker.isGrounded = false;
         jabInput = false;
         kickInput = false;
