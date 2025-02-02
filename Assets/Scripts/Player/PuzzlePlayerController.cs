@@ -42,7 +42,7 @@ public class PuzzlePlayerController : MonoBehaviour
         curHealth = maxHealth;
         RB = GetComponent<Rigidbody>();
         groundChecker = transform.GetChild(2).gameObject.GetComponent<GroundCheck>();
-        Freeze();
+        //Freeze();
         levelController = GameObject.FindWithTag("MainCamera").GetComponent<PuzzleLevelManager>();
     }
 
