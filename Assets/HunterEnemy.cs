@@ -18,9 +18,14 @@ public class HunterEnemy : MonoBehaviour
     private bool returning = false;
     private Transform playerTrans;
 
+    private MusicManager musicBox;
+    private Animator monsterAnim;
+
     void Start()
     {
+        musicBox = GameObject.FindWithTag("MainCamera").GetComponent<MusicManager>();
         playerTrans = GameObject.FindWithTag("Player").transform;
+        monsterAnim = transform.GetChild(0).gameObject.GetComponent<Animator>();
     }
 
     void Update()
@@ -58,11 +63,22 @@ public class HunterEnemy : MonoBehaviour
             gameObject.SendMessage("ResumeMovement");
         }
         if (!playerSpotted && playerSpottedTime > 0)
+        {
             playerSpottedTime -= Time.deltaTime;
+            if (playerSpottedTime < 0)
+                musicBox.TransitionTo(1, -1, 0.5f);
+        }
         else if (playerSpotted && playerSpottedTime < comprehensionTime)
+        {
+            if (playerSpottedTime <= 0)
+                musicBox.TransitionTo(1, 2, 0.5f);
             playerSpottedTime += Time.deltaTime;
+        }
         else if (playerSpottedTime >= comprehensionTime)
+        {
             playerTrans.gameObject.GetComponent<PuzzlePlayerController>().Kill(gameObject);
+            monsterAnim.SetTrigger("Scare");
+        }
     }
 
     void SetDirection(float rotation)

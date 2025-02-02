@@ -11,20 +11,63 @@ public class PuzzleLevelManager : MonoBehaviour
     public float puzzleTransitionSpeed = 1f;
     private float puzzleTransitionTime = 0f;
     public GameObject[] puzzles;
+    public Vector2 minMaxX;
 
-    public GameObject curPuzzleGO = null;
+    private GameObject curPuzzleGO = null;
 
     public float[] cameraZoom;
 
-    public Transform playerTrans;
-    public Camera mainCamera;
+    private Transform playerTrans;
+    private Camera mainCamera;
+
+    private MusicManager musicBox;
+
+    public int gameMode = 0; // 0 = Puzzle mode, 1 = fight mode
+    private int songIntensity = 0;
 
     // Start is called before the first frame update
     void Start()
     {
         playerTrans = GameObject.FindWithTag("Player").transform;
         mainCamera = GameObject.FindWithTag("MainCamera").GetComponent<Camera>();
-        StartCoroutine(LoadPuzzle());
+        musicBox = gameObject.GetComponent<MusicManager>();
+        if (gameMode == 0)
+            StartCoroutine(LoadPuzzle());
+        else
+            StartCoroutine(LoadFight());
+    }
+
+    public void SetGameMode(int newMode)
+    {
+        gameMode = newMode;
+        switch (gameMode)
+        {
+            // Puzzle mode
+            case 0:
+                if (songIntensity == 0)
+                {
+                    musicBox.TransitionTo(0, 3, 0.5f);
+                    musicBox.TransitionTo(1, -1, 0.5f);
+                }
+                else
+                {
+                    musicBox.TransitionTo(0, 3, 0.5f);
+                    musicBox.TransitionTo(1, 2, 0.5f);
+                }
+                break;
+            // Fight mode
+            case 1:
+                //Debug.Log("Play music");
+                if (musicBox.currentSong[0] != 1)
+                {
+                    //Debug.Log("playing shit");
+                    musicBox.TransitionTo(0, 0, 0, 1);
+                    musicBox.TransitionTo(1, -1, 0);
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     public void NextPuzzle()
@@ -32,7 +75,10 @@ public class PuzzleLevelManager : MonoBehaviour
         if (puzzleTransitionTime < 1f)
             return;
         ++currentPuzzle;
-        StartCoroutine(LoadPuzzle());
+        if (gameMode == 0)
+            StartCoroutine(LoadPuzzle());
+        else
+            StartCoroutine(LoadFight());
     }
 
     public IEnumerator LoadPuzzle()
@@ -72,10 +118,49 @@ public class PuzzleLevelManager : MonoBehaviour
         }
         if (curPuzzleGO != null)
             Destroy(curPuzzleGO);
+        SetGameMode(0);
 
         curPuzzleGO = newPuzzle;
 
         playerController.invulnerable = false;
         playerController.Unfreeze();
+    }
+
+    public IEnumerator LoadFight()
+    {
+        //Debug.Log("Loading fight");
+        FightPlayerController playerController = playerTrans.gameObject.GetComponent<FightPlayerController>();
+        playerController.StartCutScene();
+        playerController.normalizedInputs = new Vector2(-1f, 0f);
+        if (curPuzzleGO != null)
+        {
+            while (playerController.transform.position.x >= minMaxX.x)
+                yield return new();
+
+            Destroy(curPuzzleGO);
+        }
+
+        GameObject newPuzzle = GameObject.Instantiate(puzzles[currentPuzzle]);
+        //Debug.Log("fuck me right in the pussy");
+        mainCamera.orthographicSize = cameraZoom[currentPuzzle];
+        SetGameMode(1);
+        curPuzzleGO = newPuzzle;
+
+        playerController.transform.position = curPuzzleGO.transform.GetChild(0).position;
+        GameObject[] allEnemies = GameObject.FindGameObjectsWithTag("Enemy");
+        Vector2 enemyInputs = new Vector2(1, 0);
+        for (int i = 0; i < allEnemies.Length; ++i)
+        {
+            allEnemies[i].SendMessage("StartCutScene");
+            allEnemies[i].SendMessage("SetInputs", enemyInputs);
+        }
+
+        while (playerController.transform.position.x >= minMaxX.y)
+            yield return new();
+
+        for (int i = 0; i < allEnemies.Length; ++i)
+            allEnemies[i].SendMessage("EndCutScene");
+
+        playerController.EndCutScene();
     }
 }

@@ -118,7 +118,7 @@ public class GrabbyHand : MonoBehaviour
         //Debug.Log(col.gameObject.name);
         if (movableObstacles == (movableObstacles | (1 << col.gameObject.layer)))
         {
-            Debug.Log("yayayayya");
+            //Debug.Log("yayayayya");
             holeBlocked = true;
         }
     }

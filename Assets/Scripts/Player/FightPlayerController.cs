@@ -41,6 +41,8 @@ public class FightPlayerController : MonoBehaviour
 
     public float respawnInvulnerabilityTime = 2.0f;
 
+    private bool cutSceneMode = false;
+
     void Start()
     {
         curHealth = maxHealth;
@@ -50,6 +52,9 @@ public class FightPlayerController : MonoBehaviour
 
     void Update()
     {
+        if (cutSceneMode)
+            return;
+        //Debug.Log(normalizedInputs);
         normalizedInputs = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")).normalized;
 
         if (Input.GetButtonDown("Jump"))
@@ -60,6 +65,28 @@ public class FightPlayerController : MonoBehaviour
 
         if (Input.GetButtonDown("Jab"))
             jabInput = true;
+    }
+
+    public void StartCutScene()
+    {
+        cutSceneMode = true;
+        foreach (Transform child in transform)
+        {
+            BoxCollider col = child.gameObject.GetComponent<BoxCollider>();
+            if (col != null && !col.isTrigger && child.gameObject.layer == 9)
+                child.gameObject.layer = 13;
+        }
+    }
+
+    public void EndCutScene()
+    {
+        cutSceneMode = false;
+        foreach (Transform child in transform)
+        {
+            BoxCollider col = child.gameObject.GetComponent<BoxCollider>();
+            if (col != null && !col.isTrigger && child.gameObject.layer == 13)
+                child.gameObject.layer = 9;
+        }
     }
 
     void FixedUpdate()

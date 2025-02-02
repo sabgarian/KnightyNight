@@ -7,6 +7,8 @@ public class PuzzlePlayerController : MonoBehaviour
 {
     private PuzzleLevelManager levelController;
 
+    public AudioSource deathSound;
+    public float deathTime = 1f;
     public Quaternion perspectiveRotation;
 
     public Vector2 playerSpeed = Vector2.one;
@@ -30,6 +32,7 @@ public class PuzzlePlayerController : MonoBehaviour
     [HideInInspector]
     public bool usedInteractInput = false;
 
+    public Transform pushingObjectParent = null;
     public Transform pushingObject = null;
     public bool pushDir;
     public bool pushSide;
@@ -50,7 +53,7 @@ public class PuzzlePlayerController : MonoBehaviour
     {
         interactInput = false;
 
-        if (Input.GetButton("Jab"))
+        if (!RB.isKinematic && Input.GetButton("Jab"))
             interactInput = true;
         else
             usedInteractInput = false;
@@ -139,13 +142,13 @@ public class PuzzlePlayerController : MonoBehaviour
                     RB.velocity = perspectiveRotation * new Vector3(normalizedInputs.x * pushSpeed.x, RB.velocity.y, normalizedInputs.y * pushSpeed.y);
                     if (normalizedInputs.x > 0 && transform.localScale.x < 0)
                     {
-                        pushingObject.transform.parent = null;
+                        pushingObject.transform.parent = pushingObjectParent;
                         transform.localScale = new Vector3(-1f, 1f, 1f);
                         pushingObject.transform.parent = transform;
                     }
                     else if (normalizedInputs.x < 0 && transform.localScale.x > 0)
                     {
-                        pushingObject.transform.parent = null;
+                        pushingObject.transform.parent = pushingObjectParent;
                         transform.localScale = new Vector3(1f, 1f, 1f);
                         pushingObject.transform.parent = transform;
                     }
@@ -171,6 +174,7 @@ public class PuzzlePlayerController : MonoBehaviour
     public void Freeze()
     {
         RB.isKinematic = true;
+        EndPush();
     }
 
     public void Unfreeze()
@@ -183,6 +187,13 @@ public class PuzzlePlayerController : MonoBehaviour
         Debug.Log("Dead!");
         invulnerable = true;
         Freeze();
+        deathSound.Play();
+        StartCoroutine(RestartLevel(deathTime));
+    }
+
+    IEnumerator RestartLevel(float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
         levelController.StartCoroutine(levelController.LoadPuzzle());
     }
 
@@ -195,14 +206,18 @@ public class PuzzlePlayerController : MonoBehaviour
 
     public void EndPush()
     {
-        pushingObject.transform.parent = null;
-        pushingObject = null;
+        if (pushingObject != null)
+        {
+            pushingObject.transform.parent = pushingObjectParent;
+            pushingObject = null;
+        }
         playerAnimator.SetBool("Pushing", false);
     }
 
     public void TryPushing(Transform newObj, bool PushDir, bool PushSide)
     {
         usedInteractInput = true;
+        pushingObjectParent = newObj.parent;
         pushingObject = newObj;
         newObj.transform.parent = transform;
         newObj.gameObject.layer = pushingLayer;

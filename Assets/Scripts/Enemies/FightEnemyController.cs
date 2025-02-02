@@ -78,6 +78,8 @@ public class FightEnemyController : MonoBehaviour
 
     public bool isAttacking = false;
 
+    public bool cutSceneMode = false;
+
     void Start()
     {
         engagementManager = GameObject.FindWithTag("EngagementManager").GetComponent<EngagementManager>();
@@ -103,6 +105,8 @@ public class FightEnemyController : MonoBehaviour
 
     void Update()
     {
+        if (cutSceneMode)
+            return;
         if (engaged)
             AttackUpdate();
         else
@@ -342,6 +346,33 @@ public class FightEnemyController : MonoBehaviour
         engagementManager.RemoveEnemy(gameObject);
         Destroy(gameObject);
         //Debug.LogError("Dead :(");
+    }
+
+    public void StartCutScene()
+    {
+        cutSceneMode = true;
+        foreach (Transform child in transform)
+        {
+            BoxCollider col = child.gameObject.GetComponent<BoxCollider>();
+            if (col != null && !col.isTrigger && child.gameObject.layer == 10)
+                child.gameObject.layer = 13;
+        }
+    }
+
+    public void EndCutScene()
+    {
+        cutSceneMode = false;
+        foreach (Transform child in transform)
+        {
+            BoxCollider col = child.gameObject.GetComponent<BoxCollider>();
+            if (col != null && !col.isTrigger && child.gameObject.layer == 13)
+                child.gameObject.layer = 10;
+        }
+    }
+
+    public void SetInputs(Vector2 newInputs)
+    {
+        normalizedInputs = newInputs;
     }
 
     IEnumerator InvulnerableMode(float time)

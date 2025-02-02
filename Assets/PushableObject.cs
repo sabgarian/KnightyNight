@@ -6,6 +6,9 @@ public class PushableObject : MonoBehaviour
 {
     public int stationaryLayer = 11;
 
+    [HideInInspector]
+    public Transform levelParent;
+
     public LayerMask playerLayer;
     private GroundCheck groundCheck;
     private PuzzlePlayerController playerScript;
@@ -15,6 +18,7 @@ public class PushableObject : MonoBehaviour
 
     void Start()
     {
+        levelParent = transform.parent;
         playerScript = GameObject.FindWithTag("Player").GetComponent<PuzzlePlayerController>();
         groundCheck = transform.GetChild(0).gameObject.GetComponent<GroundCheck>();
         RB = GetComponent<Rigidbody>();
@@ -22,7 +26,7 @@ public class PushableObject : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (transform.parent == null)
+        if (transform.parent.gameObject.layer != 9)
             gameObject.layer = stationaryLayer;
 
         if (!groundCheck.isGrounded && !falling)
@@ -61,7 +65,7 @@ public class PushableObject : MonoBehaviour
             return;
         if (playerLayer == (playerLayer | (1 << col.gameObject.layer)))
         {
-            if (playerScript != null && playerScript.interactInput && playerScript.pushingObject == null)
+            if (playerScript != null && playerScript.interactInput && !playerScript.usedInteractInput && playerScript.pushingObject == null)
             {
                 Vector3 pushDirection = playerScript.transform.position - transform.position;
                 pushDirection = transform.rotation * pushDirection;

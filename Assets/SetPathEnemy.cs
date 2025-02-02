@@ -37,8 +37,8 @@ public class SetPathEnemy : MonoBehaviour
             nodeSpeed = newDir.magnitude / movementSpeed;
             gameObject.SendMessage("SetDirection", Mathf.Atan2(newDir.z, newDir.x) * Mathf.Rad2Deg, SendMessageOptions.DontRequireReceiver);
         }
-        transform.position = Vector3.Lerp(pathNodes[oldNode], pathNodes[newNode], nodeProgress);
-        if (pathNodes[oldNode].x > pathNodes[newNode].x || pathNodes[oldNode].z > pathNodes[newNode].z)
+        transform.localPosition = Vector3.Lerp(pathNodes[oldNode], pathNodes[newNode], nodeProgress);
+        if (pathNodes[oldNode].x > pathNodes[newNode].x || pathNodes[oldNode].z < pathNodes[newNode].z)
             transform.localScale = new Vector3(-1, 1, 1);
         else
             transform.localScale = new Vector3(1, 1, 1);
