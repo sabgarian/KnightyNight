@@ -147,19 +147,20 @@ public class PuzzleLevelManager : MonoBehaviour
         curPuzzleGO = newPuzzle;
 
         playerController.transform.position = curPuzzleGO.transform.GetChild(0).position;
-        GameObject[] allEnemies = GameObject.FindGameObjectsWithTag("Enemy");
-        Vector2 enemyInputs = new Vector2(1, 0);
-        for (int i = 0; i < allEnemies.Length; ++i)
-        {
-            allEnemies[i].SendMessage("StartCutScene");
-            allEnemies[i].SendMessage("SetInputs", enemyInputs);
-        }
+        //GameObject[] allEnemies = GameObject.FindGameObjectsWithTag("Enemy");
+        //Vector2 enemyInputs = new Vector2(1, 0);
+        //for (int i = 0; i < allEnemies.Length; ++i)
+        //{
+        //    allEnemies[i].SendMessage("StartCutScene");
+        //    allEnemies[i].SendMessage("SetInputs", enemyInputs);
+        //}
 
         while (playerController.transform.position.x >= minMaxX.y)
             yield return new();
+        puzzleTransitionTime = 1f;
 
-        for (int i = 0; i < allEnemies.Length; ++i)
-            allEnemies[i].SendMessage("EndCutScene");
+        //for (int i = 0; i < allEnemies.Length; ++i)
+        //    allEnemies[i].SendMessage("EndCutScene");
 
         playerController.EndCutScene();
     }

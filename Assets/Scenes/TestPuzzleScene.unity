@@ -270,7 +270,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0, g: 0.15775679, b: 0.4056604, a: 0}
+  m_BackGroundColor: {r: 0.25882354, g: 0.25882354, b: 0.25882354, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -331,20 +331,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c11ba4e85a51f5345bbbd2aa217e64bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentPuzzle: 3
+  currentPuzzle: 0
   newPuzzleCoord: {x: 100, y: 0, z: 0}
   oldPuzzleCoord: {x: -100, y: 0, z: 0}
   puzzleTransitionSpeed: 1
   puzzles:
-  - {fileID: 5597414183122400767, guid: 36d3aabfca2b11a43bdb41cb6e81f200, type: 3}
+  - {fileID: 1496673983086779058, guid: 6c0db3dc08a60f8418341b817e95d93d, type: 3}
   - {fileID: 9061841594406310797, guid: e93575578effdbf43b9c6ff39a106133, type: 3}
   - {fileID: 1709193209607605101, guid: 66e7e3191d4029f4488fe56b9d81b152, type: 3}
   - {fileID: 6751378582938873704, guid: c9a86416dd4b94a458bf668ebd526c32, type: 3}
+  minMaxX: {x: 0, y: 0}
   cameraZoom:
   - 12.67
   - 10.38
   - 11.43
   - 11.43
+  gameMode: 0
 --- !u!82 &519420034
 AudioSource:
   m_ObjectHideFlags: 0
@@ -463,6 +465,7 @@ MonoBehaviour:
   audioPlayers:
   - {fileID: 519420034}
   - {fileID: 519420036}
+  currentSong: 
 --- !u!82 &519420036
 AudioSource:
   m_ObjectHideFlags: 0

@@ -5,6 +5,7 @@ using UnityEditor.Animations;
 
 public class FightEnemyController : MonoBehaviour
 {
+    public float entryTime = 2f;
     public bool mainEnemy = false;
     public Vector2 EngagementTimeRange = Vector2.one;
 
@@ -80,6 +81,13 @@ public class FightEnemyController : MonoBehaviour
 
     public bool cutSceneMode = false;
 
+    private Animator deathParticles;
+    private int currentSmack = 0;
+    public bool sequentialSmacks = true;
+    public AudioClip[] smackSounds;
+    public AudioClip[] finalSmackSounds;
+    public AudioSource smackPlayer;
+
     void Start()
     {
         engagementManager = GameObject.FindWithTag("EngagementManager").GetComponent<EngagementManager>();
@@ -91,6 +99,18 @@ public class FightEnemyController : MonoBehaviour
         curHealth = maxHealth;
         RB = GetComponent<Rigidbody>();
         groundChecker = transform.GetChild(2).gameObject.GetComponent<GroundCheck>();
+        deathParticles = transform.GetChild(3).gameObject.GetComponent<Animator>();
+        StartCoroutine(EnterCutScene());
+    }
+
+    IEnumerator EnterCutScene()
+    {
+        StartCutScene();
+        normalizedInputs = new Vector2(1, 0);
+        invulnerable = true;
+        yield return new WaitForSeconds(entryTime);
+        EndCutScene();
+        invulnerable = false;
     }
 
     void Engage()
@@ -324,11 +344,25 @@ public class FightEnemyController : MonoBehaviour
             curHealth -= damage;
             if (curHealth <= 0)
             {
+                smackPlayer.clip = finalSmackSounds[Random.Range(0, finalSmackSounds.Length)];
+                smackPlayer.Play();
                 curHealth = 0;
                 Die();
             }
             else
             {
+                if (sequentialSmacks)
+                {
+                    smackPlayer.clip = smackSounds[currentSmack];
+                    ++currentSmack;
+                    if (currentSmack >= smackSounds.Length)
+                        currentSmack = 0;
+                }
+                else
+                {
+                    smackPlayer.clip = smackSounds[Random.Range(0, smackSounds.Length)];
+                }
+                smackPlayer.Play();
                 enemyAnimator.SetTrigger("Hit");
                 enemyAnimator.Update(0.1f);
                 enemyAnimator.ResetTrigger("Hit");
@@ -342,8 +376,12 @@ public class FightEnemyController : MonoBehaviour
 
     void Die()
     {
+        if (invulnerable)
+            return;
         invulnerable = true;
         engagementManager.RemoveEnemy(gameObject);
+        deathParticles.transform.parent = transform.parent;
+        deathParticles.SetTrigger("Die");
         Destroy(gameObject);
         //Debug.LogError("Dead :(");
     }
@@ -368,11 +406,6 @@ public class FightEnemyController : MonoBehaviour
             if (col != null && !col.isTrigger && child.gameObject.layer == 13)
                 child.gameObject.layer = 10;
         }
-    }
-
-    public void SetInputs(Vector2 newInputs)
-    {
-        normalizedInputs = newInputs;
     }
 
     IEnumerator InvulnerableMode(float time)

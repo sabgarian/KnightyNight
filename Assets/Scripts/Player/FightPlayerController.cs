@@ -43,11 +43,27 @@ public class FightPlayerController : MonoBehaviour
 
     private bool cutSceneMode = false;
 
+    private int curTalkLine = 0;
+    public AudioClip[] talkLines;
+    public AudioSource talkBox;
+    public AudioClip[] jab1Sounds;
+    public AudioClip[] jab2Sounds;
+    public AudioClip[] jab3Sounds;
+    private AudioClip[][] jabSounds = new AudioClip[3][];
+    public AudioSource gruntPlayer;
+    public AudioClip[] hitSounds;
+    public AudioSource hitPlayer;
+    public AudioClip[] smackSounds;
+    public AudioSource smackPlayer;
+
     void Start()
     {
         curHealth = maxHealth;
         RB = GetComponent<Rigidbody>();
         groundChecker = transform.GetChild(2).gameObject.GetComponent<GroundCheck>();
+        jabSounds[0] = jab1Sounds;
+        jabSounds[1] = jab2Sounds;
+        jabSounds[2] = jab3Sounds;
     }
 
     void Update()
@@ -78,7 +94,7 @@ public class FightPlayerController : MonoBehaviour
         }
     }
 
-    public void EndCutScene()
+    public void EndCutScene(bool makeIntroSound = true)
     {
         cutSceneMode = false;
         foreach (Transform child in transform)
@@ -86,6 +102,14 @@ public class FightPlayerController : MonoBehaviour
             BoxCollider col = child.gameObject.GetComponent<BoxCollider>();
             if (col != null && !col.isTrigger && child.gameObject.layer == 13)
                 child.gameObject.layer = 9;
+        }
+        if (makeIntroSound)
+        {
+            talkBox.clip = talkLines[curTalkLine];
+            ++curTalkLine;
+            if (curTalkLine >= talkLines.Length)
+                curTalkLine = 0;
+            talkBox.Play();
         }
     }
 
@@ -135,6 +159,9 @@ public class FightPlayerController : MonoBehaviour
                 // Check if trigger did anything
                 if (currentState == -66248418 || currentState == 375856309)
                 {
+                    gruntPlayer.clip = jabSounds[jabNum][Random.Range(0, jabSounds[jabNum].Length)];
+                    gruntPlayer.Play();
+
                     playerAnimator.SetTrigger("JabInput");
                     playerAnimator.SetBool("Walking", false);
                     timeSinceJab = 0;
@@ -211,19 +238,23 @@ public class FightPlayerController : MonoBehaviour
                 if (isCrouched && attackType == 0 || !isCrouched && attackType == 1)
                     return;
             }
-            curHealth -= damage;
-            if (curHealth <= 0)
-            {
-                curHealth = 0;
-                Die();
-            }
-            else
-            {
-                playerAnimator.SetTrigger("Hit");
-                playerAnimator.Update(0.1f);
-                playerAnimator.ResetTrigger("Hit");
-                StartCoroutine(InvulnerableMode(invulnerabilityTime));
-            }
+            //curHealth -= damage;
+            //if (curHealth <= 0)
+            //{
+            //    curHealth = 0;
+            //    Die();
+            //}
+            //else
+            //{
+            hitPlayer.clip = hitSounds[Random.Range(0, hitSounds.Length)];
+            hitPlayer.Play();
+            smackPlayer.clip = smackSounds[Random.Range(0, smackSounds.Length)];
+            smackPlayer.Play();
+            playerAnimator.SetTrigger("Hit");
+            playerAnimator.Update(0.1f);
+            playerAnimator.ResetTrigger("Hit");
+            StartCoroutine(InvulnerableMode(invulnerabilityTime));
+            //}
         }
     }
 

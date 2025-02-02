@@ -6,9 +6,8 @@ public class EngagementManager : MonoBehaviour
 {
     public Transform playerTrans;
 
-    public int livingEnemies = 0;
+    private int currentWave = 0;
     public GameObject[] Waves; // gameobject storing waves to set to active
-    public float enemyEntryTime = 3f; // switch animation to here and make invulnerable when approaching
 
     public int MaximumEngagers = 2;
 
@@ -28,6 +27,20 @@ public class EngagementManager : MonoBehaviour
 
     void Update()
     {
+        if (waitlist.Count + engaged.Count <= 0)
+        {
+            if (currentWave < Waves.Length)
+            {
+                Waves[currentWave].SetActive(true);
+            }
+            else
+            {
+                GameObject.FindWithTag("MainCamera").GetComponent<PuzzleLevelManager>().NextPuzzle();
+                this.enabled = false;
+                return;
+            }
+            ++currentWave;
+        }
         for (int i = 0; i < engagementTime.Count; ++i)
         {
             engagementTime[i] += Time.deltaTime;
