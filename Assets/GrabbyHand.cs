@@ -115,7 +115,7 @@ public class GrabbyHand : MonoBehaviour
 
     public void CheckHole(Collider col)
     {
-        Debug.Log(col.gameObject.name);
+        //Debug.Log(col.gameObject.name);
         if (movableObstacles == (movableObstacles | (1 << col.gameObject.layer)))
         {
             Debug.Log("yayayayya");
