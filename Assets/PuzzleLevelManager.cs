@@ -104,7 +104,7 @@ public class PuzzleLevelManager : MonoBehaviour
         FightPlayerController playerController = playerTrans.gameObject.GetComponent<FightPlayerController>();
         playerController.StartCutScene();
         playerController.normalizedInputs = new Vector2(-1f, 0f);
-        musicBox.TransitionTo(0, -1, 1);
+        musicBox.TransitionTo(0, -1, finalTransitionEndway);
         musicBox.TransitionTo(1, -1, 0);
         finalTransitionAnim.SetTrigger("Play");
         yield return new WaitForSeconds(finalTransitionEndway);

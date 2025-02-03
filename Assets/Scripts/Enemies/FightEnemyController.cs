@@ -272,9 +272,9 @@ public class FightEnemyController : MonoBehaviour
             if (jabInput && !isBlocking)
             {
                 int currentState = enemyAnimator.GetCurrentAnimatorStateInfo(0).fullPathHash;
-                enemyAnimator.SetTrigger("JabInput");
+                enemyAnimator.SetTrigger("Attack");
                 enemyAnimator.Update(0.1f);
-                enemyAnimator.ResetTrigger("JabInput");
+                enemyAnimator.ResetTrigger("Attack");
                 // Check if trigger did anything
                 if (currentState != enemyAnimator.GetCurrentAnimatorStateInfo(0).fullPathHash)
                 {
@@ -282,7 +282,7 @@ public class FightEnemyController : MonoBehaviour
                     ++jabNum;
                     if (jabNum > 2 || isCrouched && jabNum > 1)
                         jabNum = 0;
-                    enemyAnimator.SetInteger("CurrentJab", jabNum);
+                    //enemyAnimator.SetInteger("CurrentJab", jabNum);
                 }
             }
             //if (!isBlocking && kickInput)

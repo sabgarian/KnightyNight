@@ -156,7 +156,7 @@ public class PuzzlePlayerController : MonoBehaviour
             }
         }
 
-        playerAnimator.SetBool("InAir", !groundChecker.isGrounded);
+        //playerAnimator.SetBool("InAir", !groundChecker.isGrounded);
         groundChecker.isGrounded = false;
     }
 

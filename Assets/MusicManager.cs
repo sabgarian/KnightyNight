@@ -5,6 +5,11 @@ using UnityEngine;
 public class MusicManager : MonoBehaviour
 {
     public AudioClip[] songs;
+    public float[] songVolume;
+
+    public bool autoPlay = false;
+    public int autoOne = 0;
+    public int autoTwo = 1;
 
     public AudioSource[] audioPlayers;
     [HideInInspector]
@@ -25,6 +30,10 @@ public class MusicManager : MonoBehaviour
         transitionProgress = new float[audioPlayers.Length];
         transitionTime = new float[audioPlayers.Length];
         oldVolume = new float[audioPlayers.Length];
+        if (autoPlay)
+        {
+            TransitionTo(0, autoOne, 1f, autoTwo);
+        }
     }
 
     public void TransitionTo(int layerID, int songID, float newTransTime = 0f, int nextSongID = -1)
@@ -86,11 +95,15 @@ public class MusicManager : MonoBehaviour
                             }
                         }
                     }
-                    else if (audioPlayers[i].volume >= 1)
+                    else if (currentSong[i] >= 0 && audioPlayers[i].volume >= songVolume[currentSong[i]] || currentSong[i] < 0 && audioPlayers[i].volume >= 1f)
                         break;
-                    if (transitionProgress[i] >= transitionTime[i])
-                        audioPlayers[i].volume = 1;
-                    else
+                    if (currentSong[i] >= 0 && transitionProgress[i] >= transitionTime[i])
+                        audioPlayers[i].volume = songVolume[currentSong[i]];
+                    else if (currentSong[i] < 0 && transitionProgress[i] >= transitionTime[i])
+                        audioPlayers[i].volume = 1f;
+                    else if (currentSong[i] >= 0 && transitionProgress[i] < transitionTime[i])
+                        audioPlayers[i].volume = Mathf.SmoothStep(0f, songVolume[currentSong[i]], (transitionProgress[i] - halfTotalTime) / halfTotalTime);
+                    else if (currentSong[i] < 0 && transitionProgress[i] < transitionTime[i])
                         audioPlayers[i].volume = Mathf.SmoothStep(0f, 1f, (transitionProgress[i] - halfTotalTime) / halfTotalTime);
                     transitionProgress[i] += Time.deltaTime;
                 }

@@ -400,6 +400,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: f945dfe45a9afa448a9b934865bc6877, type: 3}
   - {fileID: 8300000, guid: d57a1c62380c9254dac59c6917af91cf, type: 3}
   - {fileID: 8300000, guid: e2af6adceb54aed4681403b8b6ec6a5d, type: 3}
+  songVolume: []
+  autoPlay: 0
+  autoOne: 0
+  autoTwo: 1
   audioPlayers:
   - {fileID: 1500419154}
   - {fileID: 1500419153}
@@ -439,6 +443,9 @@ MonoBehaviour:
   gameMode: 1
   finalTransitionAnim: {fileID: 0}
   finalTransitionHalfway: 0
+  finalTransitionEndway: 0
+  fightCamPos: {x: 0, y: 0, z: 0}
+  fightCamRot: {x: 0, y: 0, z: 0, w: 0}
 --- !u!81 &1500419157
 AudioListener:
   m_ObjectHideFlags: 0
@@ -457,7 +464,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0, g: 0.15775679, b: 0.4056604, a: 0}
+  m_BackGroundColor: {r: 1, g: 0.45306507, b: 0.36477983, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
