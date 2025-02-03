@@ -20,7 +20,7 @@ public class PushableObject : MonoBehaviour
     {
         levelParent = transform.parent;
         playerScript = GameObject.FindWithTag("Player").GetComponent<PuzzlePlayerController>();
-        groundCheck = transform.GetChild(0).gameObject.GetComponent<GroundCheck>();
+        groundCheck = transform.GetChild(1).gameObject.GetComponent<GroundCheck>();
         RB = GetComponent<Rigidbody>();
     }
 

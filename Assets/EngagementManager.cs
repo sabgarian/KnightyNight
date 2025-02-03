@@ -22,7 +22,8 @@ public class EngagementManager : MonoBehaviour
 
     void Start()
     {
-        playerTrans = GameObject.Find("FightPlayer").transform;
+        playerTrans = GameObject.FindWithTag("Player").transform;
+        Debug.Log("player = " + playerTrans.gameObject.name);
     }
 
     void Update()

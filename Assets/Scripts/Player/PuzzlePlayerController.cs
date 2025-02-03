@@ -182,9 +182,28 @@ public class PuzzlePlayerController : MonoBehaviour
         RB.isKinematic = false;
     }
 
+    public void NoclipStart()
+    {
+        foreach (Transform child in transform)
+        {
+            BoxCollider col = child.gameObject.GetComponent<BoxCollider>();
+            if (col != null && !col.isTrigger && child.gameObject.layer == 9)
+                child.gameObject.layer = 13;
+        }
+    }
+
+    public void NoclipEnd()
+    {
+        foreach (Transform child in transform)
+        {
+            BoxCollider col = child.gameObject.GetComponent<BoxCollider>();
+            if (col != null && !col.isTrigger && child.gameObject.layer == 13)
+                child.gameObject.layer = 9;
+        }
+    }
+
     void Die()
     {
-        Debug.Log("Dead!");
         invulnerable = true;
         Freeze();
         deathSound.Play();
@@ -193,7 +212,10 @@ public class PuzzlePlayerController : MonoBehaviour
 
     IEnumerator RestartLevel(float waitTime)
     {
+        playerAnimator.SetBool("Dead", true);
+        playerAnimator.SetTrigger("Die");
         yield return new WaitForSeconds(waitTime);
+        playerAnimator.SetBool("Dead", false);
         levelController.StartCoroutine(levelController.LoadPuzzle());
     }
 

@@ -54,7 +54,7 @@ public class GrabbyHand : MonoBehaviour
 
             if (grabProgress >= reachingToGrabRatio)
                 playerTrans.position = new Vector3(handTrans.position.x, playerTrans.position.y, handTrans.position.z);
-            if (grabProgress >= 1f)
+            if (grabProgress >= 1f || playerTrans.gameObject.GetComponent<PuzzlePlayerController>().invulnerable)
             {
                 playerTrans.gameObject.GetComponent<PuzzlePlayerController>().Unfreeze();
                 grabbing = false;

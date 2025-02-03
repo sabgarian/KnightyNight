@@ -570,6 +570,7 @@ MonoBehaviour:
   currentRandomInputs: {x: 0, y: 0}
   isAttacking: 0
   cutSceneMode: 0
+  sequentialSmacks: 1
   smackSounds:
   - {fileID: 8300000, guid: 363ce452c44fc3943998fd7074f9d687, type: 3}
   - {fileID: 8300000, guid: 7472f2f0582b3f74e9bd8ea64901fc1b, type: 3}

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PuzzleLevelManager : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class PuzzleLevelManager : MonoBehaviour
 
     public float[] cameraZoom;
 
+    public GameObject fightPlayerPref;
     private Transform playerTrans;
     private Camera mainCamera;
 
@@ -24,6 +26,12 @@ public class PuzzleLevelManager : MonoBehaviour
 
     public int gameMode = 0; // 0 = Puzzle mode, 1 = fight mode
     private int songIntensity = 0;
+
+    public Animator finalTransitionAnim;
+    public float finalTransitionHalfway;
+    public float finalTransitionEndway;
+    public Vector3 fightCamPos;
+    public Quaternion fightCamRot;
 
     // Start is called before the first frame update
     void Start()
@@ -75,10 +83,55 @@ public class PuzzleLevelManager : MonoBehaviour
         if (puzzleTransitionTime < 1f)
             return;
         ++currentPuzzle;
-        if (gameMode == 0)
-            StartCoroutine(LoadPuzzle());
+
+        if (currentPuzzle < puzzles.Length)
+        {
+            if (gameMode == 0)
+                StartCoroutine(LoadPuzzle());
+            else
+                StartCoroutine(LoadFight());
+        }
         else
-            StartCoroutine(LoadFight());
+        {
+            // End game:
+            StartCoroutine(EndGame());
+        }
+    }
+
+    IEnumerator EndGame()
+    {
+        Debug.Log("Loading fight");
+        FightPlayerController playerController = playerTrans.gameObject.GetComponent<FightPlayerController>();
+        playerController.StartCutScene();
+        playerController.normalizedInputs = new Vector2(-1f, 0f);
+        musicBox.TransitionTo(0, -1, 1);
+        musicBox.TransitionTo(1, -1, 0);
+        finalTransitionAnim.SetTrigger("Play");
+        yield return new WaitForSeconds(finalTransitionEndway);
+        SceneManager.LoadScene("GameOver");
+    }
+
+    public void SwitchToFight()
+    {
+        StartCoroutine(FightTransition());
+    }
+
+    IEnumerator FightTransition()
+    {
+        musicBox.TransitionTo(0, -1, 1);
+        musicBox.TransitionTo(1, -1, 0);
+        finalTransitionAnim.SetTrigger("Play");
+        yield return new WaitForSeconds(finalTransitionHalfway);
+        transform.position = fightCamPos;
+        transform.rotation = fightCamRot;
+        Destroy(curPuzzleGO);
+        Destroy(playerTrans.gameObject);
+        playerTrans = Instantiate(fightPlayerPref).transform;
+        SetGameMode(1);
+        puzzleTransitionTime = 1f;
+        curPuzzleGO = null;
+        yield return new();
+        NextPuzzle();
     }
 
     public IEnumerator LoadPuzzle()
@@ -102,6 +155,7 @@ public class PuzzleLevelManager : MonoBehaviour
         PuzzlePlayerController playerController = playerTrans.gameObject.GetComponent<PuzzlePlayerController>();
         playerController.invulnerable = true;
         playerController.Freeze();
+        playerController.NoclipStart();
 
         Vector3 oldPlayerPos = playerTrans.transform.position;
         float oldCamSize = mainCamera.orthographicSize;
@@ -123,12 +177,13 @@ public class PuzzleLevelManager : MonoBehaviour
         curPuzzleGO = newPuzzle;
 
         playerController.invulnerable = false;
+        playerController.NoclipEnd();
         playerController.Unfreeze();
     }
 
     public IEnumerator LoadFight()
     {
-        //Debug.Log("Loading fight");
+        Debug.Log("Loading fight");
         FightPlayerController playerController = playerTrans.gameObject.GetComponent<FightPlayerController>();
         playerController.StartCutScene();
         playerController.normalizedInputs = new Vector2(-1f, 0f);
@@ -141,6 +196,7 @@ public class PuzzleLevelManager : MonoBehaviour
         }
 
         GameObject newPuzzle = GameObject.Instantiate(puzzles[currentPuzzle]);
+        Debug.Log("Instantiated");
         //Debug.Log("fuck me right in the pussy");
         mainCamera.orthographicSize = cameraZoom[currentPuzzle];
         SetGameMode(1);
