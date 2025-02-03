@@ -100,7 +100,7 @@ public class PuzzleLevelManager : MonoBehaviour
 
     IEnumerator EndGame()
     {
-        Debug.Log("Loading fight");
+        //Debug.Log("Loading fight");
         FightPlayerController playerController = playerTrans.gameObject.GetComponent<FightPlayerController>();
         playerController.StartCutScene();
         playerController.normalizedInputs = new Vector2(-1f, 0f);

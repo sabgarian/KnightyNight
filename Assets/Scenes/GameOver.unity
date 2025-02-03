@@ -545,11 +545,11 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Programming      Max Cipher\n\n\n\n\n\n\n\n               Art      A Fine
-    Egg\n\n\n\n\n\n\n\n Composition      CustomNerd\n\t\t              Music\n\n\n\n\n\n\n\nLevel
-    Design        SoCalled\n                             Warrior\n\n\n\n\n\n\n\n 
-    Concept Art      Reyes\n\n\n\n\n\n\n\n\n\n\n\n\n\n     Thank you    for playing
-    :)"
+  m_text: "Programming      Max Cipher\n\n\n\n\n\n\n     Final /            A Fine
+    Egg\n Concept Art       \n\n\n\n\n\n\n\n Composition      CustomNerd\n\t\t             
+    Music\n\n\n\n\n\n\n\nLevel Design        SoCalled\n                            
+    Warrior\n\n\n\n\n\n\n\n  Concept Art      Reyes\n\n\n\n\n\n\n\n\n\n\n\n\n\n    
+    Thank you    for playing :)"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 79459efec17a4d00a321bdcc27bbc385, type: 2}
